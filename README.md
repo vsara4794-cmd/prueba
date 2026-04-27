@@ -180,6 +180,8 @@ https://YOUR_DOMAIN/api/health
 Important:
 - This is the **web MVP** (`web_server.py`), not the native desktop app shell.
 - Some desktop-only actions (native file dialogs, tray behavior) are not available in web mode.
+- Docker deploys use `requirements.deploy.txt` (lighter runtime dependencies) to keep image size within free-tier limits.
+- Optional heavy features depending on local desktop stack (e.g. YOLO package-based setup) may degrade gracefully in cloud mode.
 
 ---
 
