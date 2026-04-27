@@ -32,6 +32,7 @@ const state = {
     batchQueue: [],       // [{url, status: 'pending'|'active'|'done'|'error', label}]
     batchIndex: -1,       // current index being processed (-1 = not running)
     batchSettings: null,  // settings snapshot for the batch run
+    cancelRequested: false,
 };
 
 /* ── Thumbnail generator (queued + lazy) ─────────────────────────────── */
@@ -885,11 +886,24 @@ function confirmStyleAndGenerate() {
 }
 
 async function cancelProcessing() {
-    try { await pywebview.api.cancel_processing(); } catch (_) {}
-    // Cancel stops the current item; clear the rest of the queue
-    state.batchQueue.forEach(q => { if (q.status === 'pending') q.status = 'cancelled'; });
+    if (!state.processing && !state.batchQueue.some(q => q.status === 'active')) return;
+
+    // UI first: reflect cancellation immediately so the button feels responsive.
+    state.cancelRequested = true;
+    state.processing = false;
+    state.batchQueue.forEach(q => {
+        if (q.status === 'pending' || q.status === 'active') q.status = 'cancelled';
+    });
     state.batchIndex = -1;
     renderBatchQueue();
+    toast('Cancelación solicitada', 'warning');
+    resetGenerate();
+
+    // Ask backend to cancel in background; do not block UI.
+    Promise.race([
+        pywebview.api.cancel_processing(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('cancel-timeout')), 2500)),
+    ]).catch(() => {});
 }
 
 /* ── Batch Queue ──────────────────────────────────────────────────────── */
@@ -1128,6 +1142,8 @@ function renderBatchQueue() {
 }
 
 async function processNextInQueue() {
+    if (state.cancelRequested) return;
+
     // Find the next pending item
     state.batchIndex++;
     while (state.batchIndex < state.batchQueue.length && state.batchQueue[state.batchIndex].status !== 'pending') {
@@ -1327,6 +1343,13 @@ window.onMomentsDetected = function (moments) {
 };
 
 window.onPipelineComplete = function (success, doneCount, totalCount, errorMsg) {
+    if (state.cancelRequested) {
+        state.cancelRequested = false;
+        state.processing = false;
+        resetGenerate();
+        return;
+    }
+
     // Mark current batch item
     if (state.batchIndex >= 0 && state.batchIndex < state.batchQueue.length) {
         state.batchQueue[state.batchIndex].status = success ? 'done' : 'error';
@@ -1365,9 +1388,10 @@ window.onPipelineComplete = function (success, doneCount, totalCount, errorMsg) 
 };
 
 window.onPipelineCancelled = function () {
+    state.cancelRequested = false;
     state.processing = false;
     if (state.batchIndex >= 0 && state.batchIndex < state.batchQueue.length) {
-        state.batchQueue[state.batchIndex].status = 'error';
+        state.batchQueue[state.batchIndex].status = 'cancelled';
     }
     state.batchIndex = -1;
     renderBatchQueue();

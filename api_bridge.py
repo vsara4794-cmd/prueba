@@ -1347,6 +1347,7 @@ class ApiBridge:
             "retries": 3,
             "fragment_retries": 3,
             "noplaylist": True,
+            "socket_timeout": 15,
         }
 
         # If it looks like a local file path, just use it directly

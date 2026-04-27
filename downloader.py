@@ -59,6 +59,7 @@ def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
         "retries": 3,
         "fragment_retries": 3,
         "noplaylist": True,
+        "socket_timeout": 15,
     }
 
     def _run(extra_opts: dict | None = None) -> Path:
