@@ -1337,9 +1337,38 @@ class ApiBridge:
         if Path(url).exists():
             return Path(url)
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            return Path(ydl.prepare_filename(info))
+        def _run_download(extra_opts: dict | None = None) -> Path:
+            opts = dict(ydl_opts)
+            if extra_opts:
+                opts.update(extra_opts)
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                return Path(ydl.prepare_filename(info))
+
+        try:
+            return _run_download()
+        except Exception as e:
+            msg = str(e).lower()
+            bot_block = (
+                "sign in to confirm you're not a bot" in msg
+                or "use --cookies-from-browser" in msg
+            )
+            if not bot_block:
+                raise
+
+            self._push("download", 0, "YouTube pidió verificación; probando cookies del navegador…")
+            print("[i] YouTube anti-bot: reintentando con cookies del navegador")
+            for browser in ("edge", "chrome", "firefox"):
+                try:
+                    self._push("download", 0, f"Reintentando con cookies: {browser}…")
+                    return _run_download({"cookiesfrombrowser": (browser,)})
+                except Exception as be:
+                    print(f"[i] Falló descarga con cookies {browser}: {be}")
+
+            raise RuntimeError(
+                "YouTube bloqueó la descarga por verificación anti-bot. "
+                "Inicia sesión en YouTube en Edge o Chrome en este PC y vuelve a intentar."
+            ) from e
 
     # ── Upload orchestrator (background thread) ──────────────────────────
 

@@ -16,12 +16,24 @@ _FORMAT = (
     "best"
 )
 
+_YT_BOT_HINTS = (
+    "sign in to confirm you're not a bot",
+    "use --cookies-from-browser",
+    "this video is unavailable",
+)
+_COOKIE_BROWSERS = ("edge", "chrome", "firefox")
+
+
+def _is_bot_block_error(err: Exception) -> bool:
+    msg = str(err).lower()
+    return any(h in msg for h in _YT_BOT_HINTS)
+
 
 def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
     """Download a YouTube video and return the file path."""
     output_dir.mkdir(exist_ok=True)
 
-    ydl_opts = {
+    base_opts = {
         "format": _FORMAT,
         "outtmpl": str(output_dir / "%(title)s.%(ext)s"),
         "merge_output_format": "mp4",
@@ -30,10 +42,31 @@ def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
         "no_warnings": True,
     }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        filename = ydl.prepare_filename(info)
-        return Path(filename)
+    def _run(extra_opts: dict | None = None) -> Path:
+        opts = dict(base_opts)
+        if extra_opts:
+            opts.update(extra_opts)
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info)
+            return Path(filename)
+
+    try:
+        return _run()
+    except Exception as e:
+        if not _is_bot_block_error(e):
+            raise
+        print("[i] YouTube pidió verificación anti-bot; probando cookies del navegador…")
+        for browser in _COOKIE_BROWSERS:
+            try:
+                print(f"[i] Intentando con cookies de {browser}…")
+                return _run({"cookiesfrombrowser": (browser,)})
+            except Exception as be:
+                print(f"[i] Falló {browser}: {be}")
+        raise RuntimeError(
+            "YouTube bloqueó la descarga. Inicia sesión en YouTube en Edge o Chrome "
+            "y vuelve a intentar, o exporta cookies para yt-dlp."
+        ) from e
 
 
 def _ffprobe_duration(path: Path) -> float:
