@@ -872,6 +872,8 @@ function confirmStyleAndGenerate() {
     settings.music_end = trimValues ? trimValues.end : 0;
     state.batchSettings = settings;
 
+    // Clear stale cancellation flag from previous runs.
+    state.cancelRequested = false;
     state.processing = true;
     state.batchIndex = -1;
 
@@ -1232,6 +1234,7 @@ async function browseFilesMulti() {
 
 function resetGenerate() {
     state.processing = false;
+    state.cancelRequested = false;
     document.getElementById('generate-idle').classList.remove('hidden');
     document.getElementById('progress-area').classList.add('hidden');
     document.getElementById('btn-cancel').classList.add('hidden');
