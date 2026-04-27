@@ -1331,6 +1331,10 @@ class ApiBridge:
             "quiet": True,
             "no_warnings": True,
             "progress_hooks": [hook],
+            # Helps with some YouTube anti-bot checks.
+            "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+            "retries": 3,
+            "fragment_retries": 3,
         }
 
         # If it looks like a local file path, just use it directly
@@ -1352,9 +1356,20 @@ class ApiBridge:
             bot_block = (
                 "sign in to confirm you're not a bot" in msg
                 or "use --cookies-from-browser" in msg
+                or "please sign in" in msg
+                or "http error 403" in msg
             )
             if not bot_block:
                 raise
+
+            cookies_path = BASE_DIR / "cookies.txt"
+            if cookies_path.exists():
+                self._push("download", 0, "YouTube pidió verificación; probando cookies.txt…")
+                try:
+                    print(f"[i] Reintento con cookies.txt: {cookies_path}")
+                    return _run_download({"cookiefile": str(cookies_path)})
+                except Exception as ce:
+                    print(f"[i] Falló descarga con cookies.txt: {ce}")
 
             self._push("download", 0, "YouTube pidió verificación; probando cookies del navegador…")
             print("[i] YouTube anti-bot: reintentando con cookies del navegador")
@@ -1367,7 +1382,7 @@ class ApiBridge:
 
             raise RuntimeError(
                 "YouTube bloqueó la descarga por verificación anti-bot. "
-                "Inicia sesión en YouTube en Edge o Chrome en este PC y vuelve a intentar."
+                "Inicia sesión en YouTube en Edge/Chrome o agrega cookies.txt en la carpeta del proyecto."
             ) from e
 
     # ── Upload orchestrator (background thread) ──────────────────────────

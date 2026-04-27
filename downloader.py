@@ -4,7 +4,7 @@ import uuid
 import yt_dlp
 from pathlib import Path
 
-from config import DOWNLOADS_DIR
+from config import BASE_DIR, DOWNLOADS_DIR
 from subprocess_utils import run as _run
 
 # Prefer H.264 (avc1) which every ffmpeg supports.
@@ -19,6 +19,8 @@ _FORMAT = (
 _YT_BOT_HINTS = (
     "sign in to confirm you're not a bot",
     "use --cookies-from-browser",
+    "please sign in",
+    "http error 403",
     "this video is unavailable",
 )
 _COOKIE_BROWSERS = ("edge", "chrome", "firefox")
@@ -40,6 +42,10 @@ def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
         "restrictfilenames": True,   # ASCII-safe names (no unicode quotes etc.)
         "quiet": False,
         "no_warnings": True,
+        # Helps with some YouTube anti-bot checks.
+        "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+        "retries": 3,
+        "fragment_retries": 3,
     }
 
     def _run(extra_opts: dict | None = None) -> Path:
@@ -56,6 +62,16 @@ def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
     except Exception as e:
         if not _is_bot_block_error(e):
             raise
+        # 1) Try explicit cookies file (works in cloud/local).
+        cookies_path = BASE_DIR / "cookies.txt"
+        if cookies_path.exists():
+            try:
+                print(f"[i] Intentando con cookies.txt: {cookies_path}")
+                return _run({"cookiefile": str(cookies_path)})
+            except Exception as ce:
+                print(f"[i] Falló cookies.txt: {ce}")
+
+        # 2) Try browser cookies (local desktop only).
         print("[i] YouTube pidió verificación anti-bot; probando cookies del navegador…")
         for browser in _COOKIE_BROWSERS:
             try:
@@ -65,7 +81,7 @@ def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
                 print(f"[i] Falló {browser}: {be}")
         raise RuntimeError(
             "YouTube bloqueó la descarga. Inicia sesión en YouTube en Edge o Chrome "
-            "y vuelve a intentar, o exporta cookies para yt-dlp."
+            "y vuelve a intentar, o coloca un cookies.txt válido en la carpeta del proyecto."
         ) from e
 
 
