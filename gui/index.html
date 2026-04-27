@@ -660,13 +660,23 @@
                             Salida de vídeo
                         </h3>
                         <div class="setting-row">
-                            <label>Recorte vertical (9:16)</label>
+                            <label for="set-output-format">Formato de salida</label>
+                            <select id="set-output-format" class="form-select">
+                                <option value="vertical_9_16" selected>Vertical 9:16 (Shorts/TikTok)</option>
+                                <option value="square_1_1">Cuadrado 1:1 (Feed)</option>
+                                <option value="horizontal_16_9">Horizontal 16:9 (YouTube)</option>
+                                <option value="original">Original (sin recorte)</option>
+                            </select>
+                            <span class="setting-hint">Elige el tamaño final del clip según la plataforma.</span>
+                        </div>
+                        <div class="setting-row">
+                            <label>Seguimiento de persona (solo 9:16)</label>
                             <div class="toggle-group">
                                 <label class="toggle">
                                     <input type="checkbox" id="set-crop-vertical" checked>
                                     <span class="toggle-slider"></span>
                                 </label>
-                                <span class="toggle-label">Recorte automático con detección de personas</span>
+                                <span class="toggle-label">Mantiene al sujeto centrado automáticamente</span>
                             </div>
                         </div>
                         <div class="setting-row">

@@ -248,6 +248,11 @@ document.getElementById('set-auto-clips')?.addEventListener('change', e => {
     gatherSettings();
 });
 
+document.getElementById('set-output-format')?.addEventListener('change', () => {
+    syncOutputFormatControls();
+    gatherSettings();
+});
+
 // Auto-save all settings when any setting input changes
 document.querySelectorAll('#section-settings input, #section-settings select').forEach(el => {
     el.addEventListener('change', () => { try { gatherSettings(); } catch (_) {} });
@@ -3220,6 +3225,25 @@ function showYouTubeSetup() { showModal('youtube-modal'); }
 
 /* ── Settings ──────────────────────────────────────────────────────────── */
 
+function syncOutputFormatControls() {
+    const format = getVal('set-output-format') || 'vertical_9_16';
+    const crop = document.getElementById('set-crop-vertical');
+    const cropLabel = document.querySelector('label[for="set-crop-vertical"]') || null;
+    const helper = document.querySelector('.toggle-label');
+    const isVertical = format === 'vertical_9_16';
+    if (!crop) return;
+    crop.disabled = !isVertical;
+    if (!isVertical) crop.checked = false;
+    if (helper) {
+        helper.textContent = isVertical
+            ? 'Mantiene al sujeto centrado automáticamente'
+            : 'Disponible solo cuando el formato es Vertical 9:16';
+    }
+    if (cropLabel) {
+        cropLabel.style.opacity = isVertical ? '1' : '0.65';
+    }
+}
+
 function populateSettings(s) {
     // Restore auto-clips checkbox state
     const autoClipsEl = document.getElementById('set-auto-clips');
@@ -3241,9 +3265,11 @@ function populateSettings(s) {
     setSlider('set-crf', s.video_crf);
     setSelect('set-model', s.whisper_model);
     setSelect('set-preset', s.ffmpeg_preset);
+    setSelect('set-output-format', s.output_format || 'vertical_9_16');
     setVal('set-language', s.whisper_language || '');
     const crop = document.getElementById('set-crop-vertical');
     if (crop) crop.checked = s.crop_vertical !== false;
+    syncOutputFormatControls();
     const style = s.subtitle_style || 'tiktok';
     document.querySelectorAll('.style-option').forEach(opt => {
         opt.classList.toggle('active', opt.dataset.style === style);
@@ -3262,6 +3288,7 @@ function gatherSettings() {
         subtitle_style: document.querySelector('input[name="subtitle-style"]:checked')?.value || 'tiktok',
         ffmpeg_preset: getVal('set-preset'),
         video_crf: getVal('set-crf'),
+        output_format: getVal('set-output-format') || 'vertical_9_16',
         crop_vertical: document.getElementById('set-crop-vertical')?.checked ?? true,
     };
     saveLocal('settings', s);

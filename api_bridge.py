@@ -29,6 +29,7 @@ from config import (
     MIN_GAP,
     MUSIC_DIR,
     NUM_CLIPS,
+    OUTPUT_FORMAT,
     SUBTITLE_STYLE,
     SUBTITLES_DIR,
     VIDEO_CRF,
@@ -58,6 +59,13 @@ from uploader import (
 )
 
 STATE_FILE = BASE_DIR / "viria_state.json"
+
+OUTPUT_FORMAT_RATIOS = {
+    "vertical_9_16": 9 / 16,
+    "square_1_1": 1.0,
+    "horizontal_16_9": 16 / 9,
+    "original": None,
+}
 
 
 # ── Log interceptor — captures print() and forwards to the GUI console ───────
@@ -164,6 +172,39 @@ def _start_video_server(clips_dir: Path) -> int:
     return port
 
 
+def _target_ratio_from_format(output_format: str | None) -> float | None:
+    """Map the UI output format to a crop ratio."""
+    return OUTPUT_FORMAT_RATIOS.get(output_format or OUTPUT_FORMAT, 9 / 16)
+
+
+def _build_center_crop_params(video_path: Path, target_ratio: float) -> tuple[int, int, int, int] | None:
+    """Build a static center crop for the requested aspect ratio."""
+    width, height = get_dimensions(video_path)
+    if width <= 0 or height <= 0:
+        return None
+
+    current_ratio = width / height
+    if abs(current_ratio - target_ratio) < 0.02:
+        return None
+
+    if current_ratio > target_ratio:
+        crop_w = int(height * target_ratio)
+        crop_w -= crop_w % 2
+        crop_h = height
+        crop_x = (width - crop_w) // 2
+        crop_x -= crop_x % 2
+        crop_y = 0
+    else:
+        crop_w = width
+        crop_h = int(width / target_ratio)
+        crop_h -= crop_h % 2
+        crop_x = 0
+        crop_y = (height - crop_h) // 2
+        crop_y -= crop_y % 2
+
+    return crop_w, crop_h, crop_x, crop_y
+
+
 class ApiBridge:
     def __init__(self):
         self._window = None
@@ -202,6 +243,7 @@ class ApiBridge:
             "ffmpeg_preset": FFMPEG_PRESET,
             "video_crf": VIDEO_CRF,
             "crop_vertical": CROP_VERTICAL,
+            "output_format": OUTPUT_FORMAT,
         }
         # Merge saved user overrides (from save_settings)
         if self._user_settings:
@@ -897,6 +939,10 @@ class ApiBridge:
         preset = settings.get("ffmpeg_preset", FFMPEG_PRESET)
         crf = str(settings.get("video_crf", VIDEO_CRF))
         crop_vertical = settings.get("crop_vertical", CROP_VERTICAL)
+        output_format = settings.get("output_format", OUTPUT_FORMAT)
+        target_ratio = _target_ratio_from_format(output_format)
+        apply_crop = target_ratio is not None
+        tracking_enabled = bool(crop_vertical and output_format == "vertical_9_16")
         effect = settings.get("video_effect", "none")
         music_file = settings.get("music_file", None)
         music_volume = float(settings.get("music_volume", 0.12))
@@ -957,16 +1003,24 @@ class ApiBridge:
 
             crop_params = None
             crop_w, crop_h = get_dimensions(video_path)
-            if crop_vertical:
+            if apply_crop:
                 if self._cancel:
                     self._cancelled()
                     raise CancelledError("cancelled")
-                self._clip_push(clip_num, total, "audio", 0, f"Clip {clip_num}/{total}: siguiendo personas…")
-                try:
-                    crop_params = get_crop_params_dynamic(video_path, start, end)
-                except Exception as e:
-                    print(f"[!] Crop detection failed for clip {clip_num}: {e}")
-                    crop_params = None
+
+                if tracking_enabled:
+                    self._clip_push(clip_num, total, "audio", 0, f"Clip {clip_num}/{total}: siguiendo personas…")
+                    try:
+                        crop_params = get_crop_params_dynamic(
+                            video_path, start, end, target_ratio=target_ratio
+                        )
+                    except Exception as e:
+                        print(f"[!] Crop detection failed for clip {clip_num}: {e}")
+                        crop_params = None
+
+                if crop_params is None:
+                    crop_params = _build_center_crop_params(video_path, target_ratio)
+
                 if crop_params:
                     crop_w, crop_h = crop_params[0], crop_params[1]
 

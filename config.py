@@ -38,6 +38,7 @@ SUBTITLE_STYLE = "tiktok"
 
 # Cropping
 CROP_VERTICAL = True          # auto-crop to 9:16 for Shorts
+OUTPUT_FORMAT = "vertical_9_16"  # vertical_9_16 | square_1_1 | horizontal_16_9 | original
 
 # FFmpeg encoding
 FFMPEG_PRESET = "ultrafast"
