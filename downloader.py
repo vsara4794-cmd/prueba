@@ -1,5 +1,6 @@
 import re
 import uuid
+import os
 
 import yt_dlp
 from pathlib import Path
@@ -31,6 +32,17 @@ def _is_bot_block_error(err: Exception) -> bool:
     return any(h in msg for h in _YT_BOT_HINTS)
 
 
+def _cookie_candidates() -> list[Path]:
+    """Possible cookie files in priority order."""
+    env_cookie = os.getenv("YTDLP_COOKIEFILE")
+    candidates: list[Path] = []
+    if env_cookie:
+        candidates.append(Path(env_cookie))
+    candidates.append(BASE_DIR / "cookies.txt")
+    candidates.append(BASE_DIR / "tokens" / "cookies.txt")
+    return [p for p in candidates if p.exists()]
+
+
 def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
     """Download a YouTube video and return the file path."""
     output_dir.mkdir(exist_ok=True)
@@ -46,6 +58,7 @@ def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
         "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
         "retries": 3,
         "fragment_retries": 3,
+        "noplaylist": True,
     }
 
     def _run(extra_opts: dict | None = None) -> Path:
@@ -62,9 +75,8 @@ def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
     except Exception as e:
         if not _is_bot_block_error(e):
             raise
-        # 1) Try explicit cookies file (works in cloud/local).
-        cookies_path = BASE_DIR / "cookies.txt"
-        if cookies_path.exists():
+        # 1) Try explicit cookie files (works in cloud/local).
+        for cookies_path in _cookie_candidates():
             try:
                 print(f"[i] Intentando con cookies.txt: {cookies_path}")
                 return _run({"cookiefile": str(cookies_path)})

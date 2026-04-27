@@ -177,6 +177,17 @@ def _target_ratio_from_format(output_format: str | None) -> float | None:
     return OUTPUT_FORMAT_RATIOS.get(output_format or OUTPUT_FORMAT, 9 / 16)
 
 
+def _cookie_candidates() -> list[Path]:
+    """Possible cookie files in priority order."""
+    env_cookie = os.getenv("YTDLP_COOKIEFILE")
+    candidates: list[Path] = []
+    if env_cookie:
+        candidates.append(Path(env_cookie))
+    candidates.append(BASE_DIR / "cookies.txt")
+    candidates.append(BASE_DIR / "tokens" / "cookies.txt")
+    return [p for p in candidates if p.exists()]
+
+
 def _build_center_crop_params(video_path: Path, target_ratio: float) -> tuple[int, int, int, int] | None:
     """Build a static center crop for the requested aspect ratio."""
     width, height = get_dimensions(video_path)
@@ -1335,6 +1346,7 @@ class ApiBridge:
             "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
             "retries": 3,
             "fragment_retries": 3,
+            "noplaylist": True,
         }
 
         # If it looks like a local file path, just use it directly
@@ -1362,8 +1374,7 @@ class ApiBridge:
             if not bot_block:
                 raise
 
-            cookies_path = BASE_DIR / "cookies.txt"
-            if cookies_path.exists():
+            for cookies_path in _cookie_candidates():
                 self._push("download", 0, "YouTube pidió verificación; probando cookies.txt…")
                 try:
                     print(f"[i] Reintento con cookies.txt: {cookies_path}")
