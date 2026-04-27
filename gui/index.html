@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViriaRevive</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- ── Sidebar ─────────────────────────────────────────── -->
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">V</div>
+                <span class="logo-text">ViriaRevive</span>
+            </div>
+
+            <div class="nav-items">
+                <button class="nav-item active" data-section="generate" onclick="navigateTo('generate')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    <span>Generar</span>
+                </button>
+                <button class="nav-item" data-section="results" onclick="navigateTo('results')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                    <span>Resultados</span>
+                </button>
+
+                <div class="nav-separator"></div>
+
+                <button class="nav-item" data-section="library" onclick="navigateTo('library')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span>Todos los vídeos</span>
+                </button>
+                <button class="nav-item" data-section="upload" onclick="navigateTo('upload')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span>Subir</span>
+                </button>
+
+                <div class="nav-separator"></div>
+
+                <button class="nav-item" data-section="settings" onclick="navigateTo('settings')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
+                        <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+                        <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>
+                        <line x1="17" y1="16" x2="23" y2="16"/>
+                    </svg>
+                    <span>Ajustes</span>
+                </button>
+            </div>
+
+            <div class="sidebar-notif-area">
+                <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()" title="Notificaciones">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="sidebar-footer">
+                <span class="version">v2.0</span>
+            </div>
+        </nav>
+
+        <!-- ── Main content ────────────────────────────────────── -->
+        <main class="content">
+
+            <!-- ── GENERATE ──────────────────────────────────── -->
+            <section id="section-generate" class="section active">
+                <div id="generate-idle" class="generate-idle">
+                    <div class="hero">
+                        <h1>Crea clips virales</h1>
+                        <p class="subtitle">Pega una URL de YouTube: detectamos los mejores momentos, añadimos subtítulos con estilo y exportamos clips verticales 9:16 listos para publicar.</p>
+                    </div>
+
+                    <div class="url-input-card card card-glow">
+                        <!-- Textarea for URLs -->
+                        <div class="input-area-wrapper">
+                            <svg class="input-area-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            <textarea id="url-input" rows="2" placeholder="Pega URLs de YouTube — una por línea&#10;https://youtube.com/watch?v=..." spellcheck="false"></textarea>
+                            <button class="input-area-add" id="btn-add-urls" onclick="addUrlsFromInput()" title="Añadir a la cola">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </button>
+                        </div>
+
+                        <!-- File browse buttons -->
+                        <div class="input-browse-row">
+                            <span class="input-browse-label">o busca:</span>
+                            <button class="btn-secondary btn-sm" id="btn-browse" onclick="browseFile()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                Un archivo
+                            </button>
+                            <button class="btn-secondary btn-sm" id="btn-browse-multi" onclick="browseFilesMulti()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                Varios archivos
+                            </button>
+                            <button type="button" class="btn-secondary btn-sm" id="btn-source-trim" onclick="toggleSourceTrimPanel()" title="Limitar procesamiento a un tramo por tiempos">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                Tramo del vídeo
+                            </button>
+                        </div>
+                        <div id="source-trim-panel" class="source-trim-panel hidden">
+                            <div class="source-trim-field source-trim-mode-field">
+                                <span id="source-trim-mode-label" class="source-trim-mode-label">Origen del vídeo</span>
+                                <input type="hidden" id="source-trim-mode" value="none" autocomplete="off">
+                                <div class="source-trim-mode-grid" role="radiogroup" aria-labelledby="source-trim-mode-label">
+                                    <button type="button" class="source-trim-mode-btn active" data-mode="none" aria-pressed="true" onclick="setSourceTrimMode('none')">
+                                        <span class="stm-title">Todo el vídeo</span>
+                                        <span class="stm-desc">Detección inteligente: picos de audio y cambios de escena en todo el vídeo.</span>
+                                    </button>
+                                    <button type="button" class="source-trim-mode-btn" data-mode="single" aria-pressed="false" onclick="setSourceTrimMode('single')">
+                                        <span class="stm-title">Un solo tramo</span>
+                                        <span class="stm-desc">Recortas a un intervalo; luego la detección trabaja solo dentro de ese trozo.</span>
+                                    </button>
+                                    <button type="button" class="source-trim-mode-btn" data-mode="multi" aria-pressed="false" onclick="setSourceTrimMode('multi')">
+                                        <span class="stm-title">Varios tramos</span>
+                                        <span class="stm-desc">Un clip por fila (inicio y fin). Sin detección automática de picos.</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="source-trim-single-wrap" class="hidden">
+                                <div class="source-trim-inputs">
+                                    <div class="source-trim-field">
+                                        <label for="source-trim-start">Inicio del tramo</label>
+                                        <input type="text" id="source-trim-start" class="form-input" placeholder="1:00 o 60" autocomplete="off" spellcheck="false">
+                                    </div>
+                                    <div class="source-trim-field">
+                                        <label for="source-trim-end">Fin <span class="text-muted">(opcional)</span></label>
+                                        <input type="text" id="source-trim-end" class="form-input" placeholder="vacío = hasta el final" autocomplete="off" spellcheck="false">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="source-trim-multi-wrap" class="hidden">
+                                <p class="source-trim-hint" style="margin-top:0">Cada fila = un vídeo de salida (ej. 1:00 y 5:00 → clip del minuto 1 al 5). Añade tantas filas como clips quieras de este enlace.</p>
+                                <div id="source-tramo-rows" class="source-tramo-rows"></div>
+                                <button type="button" class="btn-secondary btn-sm" onclick="addSourceTramoRow()">+ Añadir tramo</button>
+                            </div>
+                            <p class="source-trim-hint">Formatos: segundos, mm:ss o hh:mm:ss. Lo que elijas se <strong>guarda en cada elemento</strong> al pulsar «+» o al añadir a la cola.</p>
+                            <span id="source-trim-summary" class="source-trim-summary"></span>
+                        </div>
+
+                        <!-- Batch queue list (hidden when empty) -->
+                        <div id="batch-queue" class="batch-queue hidden">
+                            <div class="batch-queue-header">
+                                <span id="batch-queue-label">Cola: <strong>0</strong> elementos</span>
+                                <button class="btn-text btn-sm" onclick="clearBatchQueue()">Vaciar cola</button>
+                            </div>
+                            <ul id="batch-queue-list" class="batch-queue-list"></ul>
+                        </div>
+
+                        <button class="btn-primary btn-generate" id="btn-generate" onclick="startProcessing()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            Generar clips
+                        </button>
+                    </div>
+
+                    <div class="features">
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </div>
+                            <div><strong>Detección inteligente</strong><p>Análisis de audio y escenas para encontrar los mejores momentos</p></div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="3" width="12" height="18" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+                            </div>
+                            <div><strong>Recorte vertical 9:16</strong><p>Detección de personas (YOLO) para centrar el encuadre</p></div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            </div>
+                            <div><strong>Subtítulos con estilo</strong><p>Resaltado palabra a palabra: TikTok, Neón, Negrita, etc.</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress area -->
+                <div id="progress-area" class="progress-area hidden">
+                    <div class="stages">
+                        <div class="stage" data-stage="download">
+                            <div class="stage-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                            <span>Descarga</span>
+                        </div>
+                        <div class="stage-line"></div>
+                        <div class="stage" data-stage="detect">
+                            <div class="stage-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                            <span>Detectar</span>
+                        </div>
+                        <div class="stage-line"></div>
+                        <div class="stage" data-stage="clips">
+                            <div class="stage-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                            <span>Procesar</span>
+                        </div>
+                        <div class="stage-line"></div>
+                        <div class="stage" data-stage="done">
+                            <div class="stage-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                            <span>Listo</span>
+                        </div>
+                    </div>
+                    <div class="progress-card card">
+                        <div class="progress-header">
+                            <span id="progress-status" class="progress-status">Iniciando…</span>
+                            <span id="progress-percent" class="progress-percent">0%</span>
+                        </div>
+                        <div class="progress-bar"><div id="progress-fill" class="progress-fill" style="width: 0%"></div></div>
+                    </div>
+                    <div id="clip-cards" class="clip-progress-grid"></div>
+                    <div class="progress-actions">
+                        <button class="btn-secondary btn-sm" id="btn-console" onclick="toggleConsole()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                            Consola
+                        </button>
+                        <button class="btn-danger" id="btn-cancel" onclick="cancelProcessing()">Cancelar</button>
+                    </div>
+                    <div id="console-panel" class="console-panel hidden">
+                        <div class="console-header">
+                            <span class="console-title">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                                Salida de consola
+                            </span>
+                            <div class="console-actions">
+                                <button class="console-btn" onclick="clearConsole()" title="Limpiar">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                                <button class="console-btn" onclick="toggleConsole()" title="Cerrar">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="console-log" class="console-log"></div>
+                    </div>
+                    <div id="completion-banner" class="completion-banner hidden">
+                        <div class="completion-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <h2 id="completion-title">¡Listo!</h2>
+                        <p id="completion-message">Tus clips están preparados.</p>
+                        <div class="completion-actions">
+                            <button class="btn-primary" onclick="navigateTo('results')">Ver resultados</button>
+                            <button class="btn-secondary" onclick="resetGenerate()">Generar más</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── RESULTS ───────────────────────────────────── -->
+            <section id="section-results" class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Tus clips</h2>
+                        <span id="results-count" class="section-subtitle" style="font-size:12px;color:var(--text-3);font-family:var(--font-mono);"></span>
+                    </div>
+                    <div class="section-header-actions">
+                        <button class="btn-secondary btn-sm" onclick="openFolder()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                            Abrir carpeta
+                        </button>
+                    </div>
+                </div>
+                <div id="results-grid" class="results-grid">
+                    <div class="empty-state" id="results-empty">
+                        <div class="empty-state-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/>
+                                <line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/>
+                            </svg>
+                        </div>
+                        <p>Aún no hay clips</p>
+                        <span>Genera clips desde la sección Generar</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Video Preview Modal -->
+            <div id="preview-modal" class="modal hidden">
+                <div class="modal-content card preview-modal-body">
+                    <div class="preview-modal-header">
+                        <h2 id="preview-modal-title">Vista previa</h2>
+                        <div class="preview-modal-actions">
+                            <button class="btn-icon danger" id="preview-delete-btn" onclick="deleteFromPreview()" title="Eliminar este clip">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                            <button class="meta-modal-close" onclick="closePreview()">&times;</button>
+                        </div>
+                    </div>
+                    <div class="preview-video-wrap">
+                        <video id="preview-video" controls playsinline></video>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── LIBRARY (All Videos) ───────────────────────── -->
+            <section id="section-library" class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Todos los vídeos</h2>
+                        <span id="library-count" class="section-subtitle" style="font-size:12px;color:var(--text-3);font-family:var(--font-mono);"></span>
+                    </div>
+                    <div class="section-header-actions">
+                        <button class="btn-secondary btn-sm" onclick="refreshLibrary()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                            Actualizar
+                        </button>
+                        <button class="btn-secondary btn-sm" onclick="openFolder()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                            Abrir carpeta
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats bar -->
+                <div class="library-stats" id="library-stats">
+                    <div class="library-stat">
+                        <div class="library-stat-icon videos">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </div>
+                        <div>
+                            <div class="library-stat-value" id="lib-stat-count">0</div>
+                            <div class="library-stat-label">Vídeos</div>
+                        </div>
+                    </div>
+                    <div class="library-stat">
+                        <div class="library-stat-icon size">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                        </div>
+                        <div>
+                            <div class="library-stat-value" id="lib-stat-size">0 MB</div>
+                            <div class="library-stat-label">Tamaño total</div>
+                        </div>
+                    </div>
+                    <div class="library-stat">
+                        <div class="library-stat-icon recent">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div>
+                            <div class="library-stat-value" id="lib-stat-recent">-</div>
+                            <div class="library-stat-label">Último</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="library-toolbar">
+                    <div class="library-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="library-search-input" placeholder="Buscar vídeos…" oninput="filterLibrary()">
+                    </div>
+                    <div class="library-view-btns">
+                        <button class="library-view-btn active" id="lib-view-grid" onclick="setLibraryView('grid')" title="Vista cuadrícula">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        </button>
+                        <button class="library-view-btn" id="lib-view-list" onclick="setLibraryView('list')" title="Vista lista">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Library grid -->
+                <div id="library-grid" class="library-grid">
+                    <div class="empty-state" id="library-empty">
+                        <div class="empty-state-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </div>
+                        <p>No hay vídeos en la biblioteca</p>
+                        <span>Los clips generados aparecerán aquí</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── UPLOAD ────────────────────────────────────── -->
+            <section id="section-upload" class="section">
+                <div class="section-header">
+                    <h2>Subir a YouTube</h2>
+                </div>
+
+                <!-- Empty state -->
+                <div id="upload-empty" class="empty-state">
+                    <div class="empty-state-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <p>No hay clips para subir</p>
+                    <span>Genera clips primero o copia vídeos en la carpeta de clips</span>
+                    <button class="btn-secondary btn-sm" style="margin-top:12px" onclick="openFolder()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        Abrir carpeta de clips
+                    </button>
+                </div>
+
+                <!-- Upload content -->
+                <div id="upload-content" class="upload-content hidden">
+                    <!-- YouTube Connection -->
+                    <div class="card yt-connect-card">
+                        <div class="yt-connect-header">
+                            <div class="yt-connect-info">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.13C5.12 19.56 12 19.56 12 19.56s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+                                <div>
+                                    <h3>Cuentas de YouTube</h3>
+                                    <span id="yt-status-text" class="yt-status-text">Sin cuentas conectadas</span>
+                                </div>
+                            </div>
+                            <div class="yt-connect-actions">
+                                <button class="btn-secondary btn-sm" id="btn-yt-connect" onclick="connectYouTube()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Añadir cuenta
+                                </button>
+                            </div>
+                        </div>
+                        <div id="yt-channel-area" class="yt-channel-area hidden">
+                            <div id="yt-channel-list" class="yt-channel-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Schedule — one panel does everything -->
+                    <div class="smart-schedule card">
+                        <div class="smart-sched-header">
+                            <h3>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                Programación inteligente
+                            </h3>
+                            <span id="smart-sched-summary" class="smart-sched-summary"></span>
+                        </div>
+
+                        <!-- Clips per day presets -->
+                        <div class="smart-presets">
+                            <button class="smart-preset active" data-preset="allpeaks" onclick="setSmartPreset('allpeaks')">
+                                <span class="smart-preset-icon">MAX</span>
+                                <span>Todos los picos</span>
+                            </button>
+                            <button class="smart-preset" data-preset="1perday" onclick="setSmartPreset('1perday')">
+                                <span class="smart-preset-icon">1/d</span>
+                                <span>1 al día</span>
+                            </button>
+                            <button class="smart-preset" data-preset="2perday" onclick="setSmartPreset('2perday')">
+                                <span class="smart-preset-icon">2/d</span>
+                                <span>2 al día</span>
+                            </button>
+                            <button class="smart-preset" data-preset="3perday" onclick="setSmartPreset('3perday')">
+                                <span class="smart-preset-icon">3/d</span>
+                                <span>3 al día</span>
+                            </button>
+                            <button class="smart-preset" data-preset="5perday" onclick="setSmartPreset('5perday')">
+                                <span class="smart-preset-icon">5/d</span>
+                                <span>5 al día</span>
+                            </button>
+                            <button class="smart-preset" data-preset="custom" onclick="setSmartPreset('custom')">
+                                <span class="smart-preset-icon">...</span>
+                                <span>Personalizado</span>
+                            </button>
+                        </div>
+
+                        <!-- Peak times info + options row -->
+                        <div class="peak-times-info">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            <span>Asigna automáticamente horarios pico de YouTube para mayor alcance</span>
+                        </div>
+                        <div class="smart-options">
+                            <div class="smart-option-group">
+                                <label>Privacidad</label>
+                                <select id="smart-sched-privacy">
+                                    <option value="private">Privado</option>
+                                    <option value="unlisted">No listado</option>
+                                    <option value="public" selected>Público</option>
+                                </select>
+                            </div>
+                            <div class="smart-option-group smart-custom-interval hidden" id="smart-custom-interval">
+                                <label>Clips por día</label>
+                                <input type="number" id="smart-sched-custom-perday" value="4" min="1" max="20" style="width: 60px;">
+                            </div>
+                            <div class="smart-option-group">
+                                <label>Canal</label>
+                                <select id="smart-sched-channel">
+                                    <option value="">Selecciona un canal…</option>
+                                </select>
+                            </div>
+                            <div class="smart-option-group">
+                                <label>Empezar desde</label>
+                                <select id="smart-sched-start">
+                                    <option value="tomorrow" selected>Mañana</option>
+                                    <option value="today">Hoy</option>
+                                </select>
+                            </div>
+                            <button class="btn-primary smart-schedule-btn" onclick="autoScheduleClips()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                Programar todos los clips
+                            </button>
+                        </div>
+
+                        <!-- Peak times legend (dynamic) -->
+                        <div class="peak-times-legend">
+                            <span class="peak-label">Franjas pico usadas:</span>
+                            <span id="peak-times-slots"></span>
+                        </div>
+                    </div>
+
+                    <!-- Missed uploads banner (hidden by default) -->
+                    <div id="missed-uploads-banner" class="missed-uploads-banner hidden">
+                        <div class="missed-banner-left">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span id="missed-uploads-text">Algunas subidas programadas se perdieron</span>
+                        </div>
+                        <div class="missed-banner-actions">
+                            <button class="btn-secondary btn-sm" onclick="rescheduleOverdue()">Reprogramar</button>
+                            <button class="btn-primary btn-sm" onclick="uploadOverdueNow()">Subir ahora</button>
+                            <button class="missed-dismiss" onclick="dismissMissedBanner()">&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Calendar + Clip Tray for manual scheduling -->
+                    <div class="calendar-layout">
+                        <div class="clip-tray card">
+                            <h3>Tus clips</h3>
+                            <p class="clip-tray-hint">Arrastra a una fecha del calendario</p>
+                            <div id="clip-tray-list" class="clip-tray-list"></div>
+                        </div>
+                        <div class="calendar-area card">
+                            <!-- Channel filter tabs -->
+                            <div id="cal-channel-tabs" class="cal-channel-tabs hidden">
+                                <button class="cal-ch-tab active" data-channel="all" onclick="filterCalendarByChannel('all')">Todos los canales</button>
+                            </div>
+                            <div class="cal-header">
+                                <button class="cal-nav" onclick="calNavMonth(-1)">&lt;</button>
+                                <h3 id="cal-month-label"></h3>
+                                <button class="cal-nav" onclick="calNavMonth(1)">&gt;</button>
+                                <button class="cal-today-btn" onclick="calGoToday()">Hoy</button>
+                            </div>
+                            <div class="cal-grid">
+                                <div class="cal-weekdays">
+                                    <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+                                </div>
+                                <div id="cal-days" class="cal-days"></div>
+                            </div>
+                            <div class="cal-legend">
+                                <span class="cal-legend-item"><span class="cal-legend-dot pending"></span> Pendiente</span>
+                                <span class="cal-legend-item"><span class="cal-legend-dot uploaded"></span> Subido</span>
+                                <span class="cal-legend-item"><span class="cal-legend-dot missed"></span> Perdido</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Plan timeline -->
+                    <div id="schedule-timeline" class="schedule-timeline hidden">
+                        <div class="timeline-header">
+                            <h3>Plan de subidas</h3>
+                            <div class="timeline-actions">
+                                <button class="btn-text btn-sm btn-danger-text" onclick="clearSchedule()">Borrar todo</button>
+                            </div>
+                        </div>
+                        <div id="timeline-list" class="timeline-list"></div>
+                    </div>
+
+                    <!-- Upload progress -->
+                    <div id="upload-progress-card" class="card hidden">
+                        <div class="progress-header">
+                            <span id="upload-status">Subiendo…</span>
+                            <span id="upload-percent">0%</span>
+                        </div>
+                        <div class="progress-bar"><div id="upload-fill" class="progress-fill" style="width: 0%"></div></div>
+                    </div>
+
+                    <!-- Upload options -->
+                    <div class="card upload-options-card" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:12px;flex-wrap:wrap">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <label class="toggle" style="flex-shrink:0">
+                                <input type="checkbox" id="auto-delete-toggle" onchange="toggleAutoDelete(this.checked)">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <span style="font-size:13px;font-weight:500;color:var(--text-1)">Borrar del PC tras subir</span>
+                                <span style="font-size:11px;color:var(--text-3);display:block">Elimina los clips del disco al subirlos bien a YouTube</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <button class="btn-secondary btn-sm" onclick="refreshUploadClips()" title="Buscar vídeos nuevos en la carpeta de clips">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                                Actualizar clips
+                            </button>
+                            <button class="btn-secondary btn-sm" id="btn-gen-ai-titles" onclick="generateAITitlesManual()" title="Generar títulos con IA y renombrar archivos">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                                Títulos con IA
+                            </button>
+                            <button class="btn-secondary btn-sm" onclick="toggleGlobalConsole()" title="Mostrar u ocultar consola de registro">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                                Consola
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Big upload button -->
+                    <button class="btn-primary btn-upload-go" id="btn-upload" onclick="startUpload()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        Subir clips programados
+                    </button>
+
+                    <p class="upload-hint">Necesitas <code>client_secrets.json</code> de Google Cloud Console. <a href="#" onclick="showYouTubeSetup()">Guía de configuración</a></p>
+                </div>
+            </section>
+
+            <!-- ── SETTINGS ──────────────────────────────────── -->
+            <section id="section-settings" class="section">
+                <div class="section-header">
+                    <h2>Ajustes</h2>
+                    <button class="btn-secondary btn-sm" onclick="resetSettings()">Restaurar valores</button>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="card settings-card">
+                        <h3>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Detección de clips
+                        </h3>
+                        <div class="setting-row">
+                            <label>Número de clips</label>
+                            <div class="slider-group">
+                                <input type="range" id="set-num-clips" min="1" max="50" value="5" oninput="updateSliderLabel(this)">
+                                <span class="slider-val" id="val-num-clips">5</span>
+                                <label class="auto-check"><input type="checkbox" id="set-auto-clips"> Auto</label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <label>Duración del clip</label>
+                            <div class="slider-group">
+                                <input type="range" id="set-clip-duration" min="10" max="3000" step="5" value="30" oninput="updateSliderLabel(this)">
+                                <span class="slider-val" id="val-clip-duration">30s</span>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <label>Separación mínima entre clips (s)</label>
+                            <div class="slider-group">
+                                <input type="range" id="set-min-gap" min="5" max="60" step="5" value="15" oninput="updateSliderLabel(this)">
+                                <span class="slider-val" id="val-min-gap">15s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card settings-card">
+                        <h3>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                            Salida de vídeo
+                        </h3>
+                        <div class="setting-row">
+                            <label>Recorte vertical (9:16)</label>
+                            <div class="toggle-group">
+                                <label class="toggle">
+                                    <input type="checkbox" id="set-crop-vertical" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Recorte automático con detección de personas</span>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <label for="set-preset">Preset FFmpeg</label>
+                            <select id="set-preset" class="form-select">
+                                <option value="ultrafast" selected>Ultra rápido</option>
+                                <option value="superfast">Súper rápido</option>
+                                <option value="veryfast">Muy rápido</option>
+                                <option value="faster">Más rápido</option>
+                                <option value="fast">Rápido</option>
+                            </select>
+                        </div>
+                        <div class="setting-row">
+                            <label>Calidad de vídeo (CRF)</label>
+                            <div class="slider-group">
+                                <input type="range" id="set-crf" min="18" max="32" value="23" oninput="updateSliderLabel(this)">
+                                <span class="slider-val" id="val-crf">23</span>
+                            </div>
+                            <span class="setting-hint">Menor valor = mejor calidad, archivo más grande</span>
+                        </div>
+                    </div>
+
+                    <div class="card settings-card">
+                        <h3>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                            Transcripción
+                        </h3>
+                        <div class="setting-row">
+                            <label for="set-model">Modelo Whisper</label>
+                            <select id="set-model" class="form-select">
+                                <option value="tiny">Tiny (más rápido)</option>
+                                <option value="base" selected>Base (equilibrado)</option>
+                                <option value="small">Small (mejor)</option>
+                                <option value="medium">Medium (alta calidad)</option>
+                                <option value="large-v3">Large v3 (máxima)</option>
+                            </select>
+                        </div>
+                        <div class="setting-row">
+                            <label for="set-language">Idioma</label>
+                            <input type="text" id="set-language" class="form-input" placeholder="Detección automática" spellcheck="false">
+                            <span class="setting-hint">Vacío = detección automática</span>
+                        </div>
+                    </div>
+
+                    <div class="card settings-card">
+                        <h3>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            Estilo de subtítulos
+                        </h3>
+                        <div class="style-options" id="settings-style-options">
+                            <label class="style-option active" data-style="tiktok">
+                                <input type="radio" name="subtitle-style" value="tiktok" checked>
+                                <div class="style-preview tiktok-preview">
+                                    <span class="preview-word">THIS</span>
+                                    <span class="preview-word highlight-yellow">IS</span>
+                                    <span class="preview-word">VIRAL</span>
+                                </div>
+                                <span class="style-name">TikTok</span>
+                            </label>
+                            <label class="style-option" data-style="karaoke">
+                                <input type="radio" name="subtitle-style" value="karaoke">
+                                <div class="style-preview karaoke-preview">
+                                    <span class="preview-word highlight-yellow-partial">THI</span><span class="preview-word">S IS VIRAL</span>
+                                </div>
+                                <span class="style-name">Karaoke</span>
+                            </label>
+                            <label class="style-option" data-style="glow">
+                                <input type="radio" name="subtitle-style" value="glow">
+                                <div class="style-preview glow-preview">
+                                    <span class="preview-word">THIS</span>
+                                    <span class="preview-word highlight-pink">IS</span>
+                                    <span class="preview-word">VIRAL</span>
+                                </div>
+                                <span class="style-name">Neón</span>
+                            </label>
+                            <label class="style-option" data-style="clean">
+                                <input type="radio" name="subtitle-style" value="clean">
+                                <div class="style-preview clean-preview">
+                                    <span class="preview-word">THIS</span>
+                                    <span class="preview-word highlight-orange">IS</span>
+                                    <span class="preview-word">VIRAL</span>
+                                </div>
+                                <span class="style-name">Limpio</span>
+                            </label>
+                            <label class="style-option" data-style="bold">
+                                <input type="radio" name="subtitle-style" value="bold">
+                                <div class="style-preview bold-preview">
+                                    <span class="preview-word">THIS</span>
+                                    <span class="preview-word highlight-red">IS</span>
+                                    <span class="preview-word">VIRAL</span>
+                                </div>
+                                <span class="style-name">Negrita</span>
+                            </label>
+                            <label class="style-option" data-style="minimal">
+                                <input type="radio" name="subtitle-style" value="minimal">
+                                <div class="style-preview minimal-preview">
+                                    <span class="preview-word dim">this</span>
+                                    <span class="preview-word">is</span>
+                                    <span class="preview-word dim">viral</span>
+                                </div>
+                                <span class="style-name">Mínimo</span>
+                            </label>
+                        </div>
+                        <span class="setting-hint" style="margin-top:10px">Consejo: también puedes elegir estilo, efectos y música en el asistente antes de generar</span>
+                    </div>
+
+                    <div class="card settings-card">
+                        <h3>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                            Acerca de
+                        </h3>
+                        <div class="setting-row">
+                            <p style="color:var(--text-2);font-size:12.5px;line-height:1.6">
+                                <strong>ViriaRevive v2.0</strong> genera clips virales 9:16 desde YouTube o archivos locales.
+                                Incluye seguimiento de personas (YOLO), estilos de subtítulo, música de fondo y efectos de vídeo.
+                            </p>
+                        </div>
+                        <div class="setting-row">
+                            <label>Carpetas de datos</label>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap">
+                                <button class="btn-secondary btn-sm" onclick="openFolder()">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                    Clips
+                                </button>
+                                <button class="btn-secondary btn-sm" onclick="openMusicFolder()">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                                    Music
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Center Panel -->
+    <div class="notif-overlay" id="notif-overlay" onclick="closeNotifPanel()"></div>
+    <div class="notif-panel" id="notif-panel">
+        <div class="notif-panel-header">
+            <h3>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Actividad
+            </h3>
+            <div class="notif-panel-actions">
+                <button class="notif-clear-btn" onclick="clearAllNotifications()">Borrar todo</button>
+                <button class="notif-close-btn" onclick="closeNotifPanel()">&times;</button>
+            </div>
+        </div>
+        <div class="notif-list" id="notif-list">
+            <div class="notif-empty" id="notif-empty">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span>Sin notificaciones</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- FFmpeg warning modal -->
+    <div id="ffmpeg-modal" class="modal hidden">
+        <div class="modal-content card">
+            <h2>No se encontró FFmpeg</h2>
+            <p>ViriaRevive necesita <strong>ffmpeg</strong> en el PATH para descargar, recortar y codificar vídeos.</p>
+            <ol class="setup-steps" style="text-align:left;margin:12px 0;font-size:0.95rem">
+                <li><strong>Opción rápida (Windows, recomendada):</strong> <code>winget install &quot;FFmpeg (Essentials Build)&quot;</code> (suele bastar para ViriaRevive: libass, x264…). Alternativa más completa: <code>winget install ffmpeg</code> (release full). Cierra y vuelve a abrir la app.</li>
+                <li><strong>Sin tocar el PATH:</strong> descarga <strong>ffmpeg-release-essentials.zip</strong> desde <a href="https://www.gyan.dev/ffmpeg/builds/" target="_blank" rel="noopener">gyan.dev/ffmpeg/builds</a>, descomprime y coloca <code>ffmpeg.exe</code> en <code>…/ViriaRevive-main/ffmpeg/bin/</code> (junto a <code>config.py</code>).</li>
+                <li><strong>Full solo si lo necesitas:</strong> más códecs y librerías (p. ej. algunos filtros extra); para clips y subtítulos suele sobrar con <strong>Essentials</strong>.</li>
+            </ol>
+            <p class="text-muted" style="font-size:0.9rem">Si ya lo instalaste, pulsa «Comprobar de nuevo» tras cerrar y abrir la terminal o la app.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px">
+                <button class="btn-secondary" type="button" onclick="closeModal('ffmpeg-modal')">Cerrar</button>
+                <button class="btn-primary" type="button" onclick="recheckFfmpeg()">Comprobar de nuevo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- YouTube setup modal -->
+    <div id="youtube-modal" class="modal hidden">
+        <div class="modal-content card">
+            <h2>Configuración API de YouTube</h2>
+            <ol class="setup-steps">
+                <li>Entra en <strong>console.cloud.google.com</strong></li>
+                <li>Crea un proyecto nuevo</li>
+                <li>Activa <strong>YouTube Data API v3</strong></li>
+                <li>Crea credenciales <strong>OAuth 2.0</strong> (aplicación de escritorio)</li>
+                <li>Descarga el archivo JSON</li>
+                <li>Guárdalo como <code>client_secrets.json</code> en la carpeta de ViriaRevive</li>
+            </ol>
+            <button class="btn-primary" onclick="closeModal('youtube-modal')">Listo</button>
+        </div>
+    </div>
+
+    <!-- Clip metadata edit modal -->
+    <div id="meta-modal" class="modal hidden">
+        <div class="modal-content card meta-modal-body">
+            <div class="meta-modal-header">
+                <h2 id="meta-modal-title">Editar clip</h2>
+                <button class="meta-modal-close" onclick="closeMetaModal()">&times;</button>
+            </div>
+            <div class="meta-modal-fields">
+                <div class="meta-field">
+                    <label style="display:flex;align-items:center;justify-content:space-between">
+                        Título
+                        <button class="btn-text btn-sm" onclick="regenerateTitle(state.editingScheduleIdx)" title="Generar título con IA desde la transcripción">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                            Título IA
+                        </button>
+                    </label>
+                    <input type="text" class="form-input" id="modal-meta-title" maxlength="100">
+                </div>
+                <div class="meta-field">
+                    <label>Descripción <span class="optional">(opcional)</span></label>
+                    <textarea class="form-input" id="modal-meta-desc" rows="3" placeholder="#shorts #viral"></textarea>
+                </div>
+                <div class="meta-row-2">
+                    <div class="meta-field">
+                        <label>Etiquetas <span class="optional">(opcional)</span></label>
+                        <input type="text" class="form-input" id="modal-meta-tags" placeholder="shorts, viral">
+                    </div>
+                    <div class="meta-field">
+                        <label>Categoría</label>
+                        <select class="form-select" id="modal-meta-category">
+                            <option value="22" selected>Personas y blogs</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="meta-row-2">
+                    <div class="meta-field">
+                        <label>Privacidad</label>
+                        <select class="form-select" id="modal-meta-privacy">
+                            <option value="private" selected>Privado</option>
+                            <option value="unlisted">No listado</option>
+                            <option value="public">Público</option>
+                        </select>
+                    </div>
+                    <div class="meta-field">
+                        <label>Hora</label>
+                        <input type="time" class="form-input" id="modal-meta-time" value="12:00">
+                    </div>
+                </div>
+            </div>
+            <div class="meta-modal-actions">
+                <button class="btn-danger btn-sm" onclick="removeScheduledItem()">Quitar</button>
+                <button class="btn-primary" onclick="saveMetaModal()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clip picker modal (for calendar day click) -->
+    <div id="clip-picker-modal" class="modal hidden">
+        <div class="modal-content card clip-picker-body">
+            <div class="meta-modal-header">
+                <h2 id="clip-picker-title">Programar un clip</h2>
+                <button class="meta-modal-close" onclick="closeModal('clip-picker-modal')">&times;</button>
+            </div>
+            <p class="clip-picker-hint">Elige un clip para este día:</p>
+            <div id="clip-picker-list" class="clip-picker-list"></div>
+            <div class="meta-field" style="margin-top:14px">
+                <label>Hora</label>
+                <input type="time" class="form-input" id="picker-time" value="12:00">
+            </div>
+        </div>
+    </div>
+
+    <!-- Day Detail Modal — shows all clips scheduled on a specific day -->
+    <div id="day-detail-modal" class="modal hidden">
+        <div class="modal-content card day-detail-body">
+            <div class="meta-modal-header">
+                <h2 id="day-detail-title">Clips programados</h2>
+                <button class="meta-modal-close" onclick="closeModal('day-detail-modal')">&times;</button>
+            </div>
+            <div id="day-detail-list" class="day-detail-list"></div>
+            <div class="day-detail-actions">
+                <button class="btn-secondary" id="day-detail-add-btn" onclick="closeDayDetailAndAddClip()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Añadir clip a este día
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pre-processing Wizard Modal (style → effects → music) -->
+    <div id="style-picker-modal" class="modal hidden">
+        <div class="modal-content card style-picker-body">
+            <!-- Step indicators -->
+            <div class="wizard-steps">
+                <div class="wizard-step active" data-step="1"><span class="wizard-step-num">1</span><span>Estilo</span></div>
+                <div class="wizard-step-line"></div>
+                <div class="wizard-step" data-step="2"><span class="wizard-step-num">2</span><span>Efectos</span></div>
+                <div class="wizard-step-line"></div>
+                <div class="wizard-step" data-step="3"><span class="wizard-step-num">3</span><span>Música</span></div>
+            </div>
+
+            <!-- STEP 1: Subtitle Style -->
+            <div class="wizard-page active" id="wizard-step-1">
+                <div class="meta-modal-header">
+                    <h2>Estilo de subtítulos</h2>
+                    <button class="meta-modal-close" onclick="closeModal('style-picker-modal')">&times;</button>
+                </div>
+                <p class="style-picker-hint">Elige cómo se verán los subtítulos:</p>
+                <div class="style-picker-grid" id="style-picker-grid">
+                    <label class="style-pick-card active" data-style="tiktok">
+                        <input type="radio" name="picker-style" value="tiktok" checked>
+                        <div class="style-pick-preview tiktok-preview">
+                            <span class="preview-word">THIS</span>
+                            <span class="preview-word highlight-yellow">IS</span>
+                            <span class="preview-word">VIRAL</span>
+                        </div>
+                        <div class="style-pick-info">
+                            <span class="style-pick-name">TikTok</span>
+                            <span class="style-pick-desc">Negrita clásica con acento amarillo</span>
+                        </div>
+                    </label>
+                    <label class="style-pick-card" data-style="karaoke">
+                        <input type="radio" name="picker-style" value="karaoke">
+                        <div class="style-pick-preview karaoke-preview">
+                            <span class="preview-word highlight-yellow-partial">THI</span><span class="preview-word">S IS VIRAL</span>
+                        </div>
+                        <div class="style-pick-info">
+                            <span class="style-pick-name">Karaoke</span>
+                            <span class="style-pick-desc">Relleno suave de izquierda a derecha</span>
+                        </div>
+                    </label>
+                    <label class="style-pick-card" data-style="glow">
+                        <input type="radio" name="picker-style" value="glow">
+                        <div class="style-pick-preview glow-preview">
+                            <span class="preview-word">THIS</span>
+                            <span class="preview-word highlight-pink">IS</span>
+                            <span class="preview-word">VIRAL</span>
+                        </div>
+                        <div class="style-pick-info">
+                            <span class="style-pick-name">Neón</span>
+                            <span class="style-pick-desc">Neón rosa vibrante</span>
+                        </div>
+                    </label>
+                    <label class="style-pick-card" data-style="clean">
+                        <input type="radio" name="picker-style" value="clean">
+                        <div class="style-pick-preview clean-preview">
+                            <span class="preview-word">THIS</span>
+                            <span class="preview-word highlight-orange">IS</span>
+                            <span class="preview-word">VIRAL</span>
+                        </div>
+                        <div class="style-pick-info">
+                            <span class="style-pick-name">Limpio</span>
+                            <span class="style-pick-desc">Blanco elegante, acento naranja</span>
+                        </div>
+                    </label>
+                    <label class="style-pick-card" data-style="bold">
+                        <input type="radio" name="picker-style" value="bold">
+                        <div class="style-pick-preview bold-preview">
+                            <span class="preview-word">THIS</span>
+                            <span class="preview-word highlight-red">IS</span>
+                            <span class="preview-word">VIRAL</span>
+                        </div>
+                        <div class="style-pick-info">
+                            <span class="style-pick-name">Negrita</span>
+                            <span class="style-pick-desc">Rojo intenso y sombras marcadas</span>
+                        </div>
+                    </label>
+                    <label class="style-pick-card" data-style="minimal">
+                        <input type="radio" name="picker-style" value="minimal">
+                        <div class="style-pick-preview minimal-preview">
+                            <span class="preview-word dim">this</span>
+                            <span class="preview-word">is</span>
+                            <span class="preview-word dim">viral</span>
+                        </div>
+                        <div class="style-pick-info">
+                            <span class="style-pick-name">Mínimo</span>
+                            <span class="style-pick-desc">Blanco sutil y contorno fino</span>
+                        </div>
+                    </label>
+                </div>
+                <button class="btn-primary style-picker-go" onclick="wizardNext(2)">
+                    Siguiente: efectos
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+
+            <!-- STEP 2: Video Effects -->
+            <div class="wizard-page" id="wizard-step-2">
+                <div class="meta-modal-header">
+                    <h2>Efecto de vídeo</h2>
+                    <button class="meta-modal-close" onclick="closeModal('style-picker-modal')">&times;</button>
+                </div>
+                <p class="style-picker-hint">Aplica un filtro de color o ambiente a tus clips:</p>
+                <div class="effects-grid" id="effects-grid">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="wizard-nav">
+                    <button class="btn-secondary" onclick="wizardNext(1)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                        Atrás
+                    </button>
+                    <button class="btn-primary" onclick="wizardNext(3)">
+                        Siguiente: música
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Background Music -->
+            <div class="wizard-page" id="wizard-step-3">
+                <div class="meta-modal-header">
+                    <h2>Música de fondo</h2>
+                    <button class="meta-modal-close" onclick="closeModal('style-picker-modal')">&times;</button>
+                </div>
+                <p class="style-picker-hint">Añade música de fondo suave a tus clips:</p>
+
+                <div class="music-toggle-row">
+                    <label class="toggle">
+                        <input type="checkbox" id="wizard-music-enabled">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span>Activar música de fondo</span>
+                </div>
+
+                <div id="music-options" class="music-options hidden">
+                    <div class="music-track-list" id="music-track-list">
+                        <!-- Populated by JS -->
+                    </div>
+                    <button class="btn-secondary btn-sm" onclick="openMusicFolder()" style="margin-top:8px">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        Abrir carpeta de música
+                    </button>
+                    <p class="setting-hint" style="margin-top:6px">Copia archivos .mp3/.wav en la carpeta music/ y actualiza</p>
+
+                    <!-- Waveform Trimmer -->
+                    <div id="music-trimmer" class="music-trimmer hidden">
+                        <div class="trimmer-header">
+                            <span class="trimmer-track-name" id="trimmer-track-name"></span>
+                            <span class="trimmer-duration" id="trimmer-duration"></span>
+                        </div>
+                        <div class="trimmer-canvas-wrap" id="trimmer-canvas-wrap">
+                            <canvas id="trimmer-canvas" height="64"></canvas>
+                            <div class="trimmer-selection" id="trimmer-selection">
+                                <div class="trimmer-handle trimmer-handle-left" id="trimmer-handle-left"></div>
+                                <div class="trimmer-handle trimmer-handle-right" id="trimmer-handle-right"></div>
+                            </div>
+                            <div class="trimmer-playhead" id="trimmer-playhead"></div>
+                        </div>
+                        <div class="trimmer-times">
+                            <span id="trimmer-start-time">0:00</span>
+                            <span class="trimmer-selected-duration" id="trimmer-sel-duration">Selección: 0:00</span>
+                            <span id="trimmer-end-time">0:00</span>
+                        </div>
+                        <div class="trimmer-controls">
+                            <button class="btn-secondary btn-sm" id="btn-trimmer-play" onclick="trimmerPlayPreview()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                Vista previa
+                            </button>
+                            <button class="btn-secondary btn-sm" onclick="trimmerReset()">Restablecer</button>
+                            <button class="btn-secondary btn-sm" onclick="trimmerSelectAll()">Usar pista completa</button>
+                        </div>
+                        <audio id="trimmer-audio" preload="auto"></audio>
+                    </div>
+
+                    <div class="setting-row" style="margin-top:14px">
+                        <label>Volumen de música</label>
+                        <div class="slider-group">
+                            <input type="range" id="wizard-music-volume" min="1" max="40" value="12" oninput="document.getElementById('val-music-vol').textContent = this.value + '%'">
+                            <span class="slider-val" id="val-music-vol">12%</span>
+                        </div>
+                        <span class="setting-hint">Recomendado: 8–15% para fondo discreto</span>
+                    </div>
+                </div>
+
+                <div class="wizard-nav">
+                    <button class="btn-secondary" onclick="wizardNext(2)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                        Atrás
+                    </button>
+                    <button class="btn-primary style-picker-go" onclick="confirmStyleAndGenerate()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Generar clips
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="confirm-delete-modal" class="modal hidden">
+        <div class="modal-content card confirm-modal-body">
+            <h2>Eliminar vídeo</h2>
+            <p id="confirm-delete-msg">¿Seguro que quieres eliminar este clip?</p>
+            <div class="confirm-modal-actions">
+                <button class="btn-secondary" onclick="closeModal('confirm-delete-modal')">Cancelar</button>
+                <button class="btn-danger" id="confirm-delete-btn" onclick="confirmDelete()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scheduler status bar -->
+    <div id="scheduler-bar" class="scheduler-bar hidden">
+        <span class="scheduler-dot"></span>
+        <span id="scheduler-status-text">Programador activo</span>
+    </div>
+
+    <!-- Global console panel (accessible from any section) -->
+    <div id="global-console" class="global-console hidden">
+        <div class="console-header">
+            <span class="console-title">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                Salida de consola
+            </span>
+            <div class="console-actions">
+                <button class="console-btn" onclick="clearGlobalConsole()" title="Limpiar">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                <button class="console-btn" onclick="toggleGlobalConsole()" title="Cerrar">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                </button>
+            </div>
+        </div>
+        <div id="global-console-log" class="console-log"></div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="web-embed.js"></script>
+</body>
+</html>
