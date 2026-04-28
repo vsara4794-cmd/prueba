@@ -22,6 +22,8 @@ const state = {
     // Library
     libraryClips: [],
     libraryView: 'grid',
+    teacherTools: [],
+    editingToolIndex: -1,
     // Preview
     previewClipIdx: -1,
     // Delete
@@ -207,6 +209,7 @@ window.addEventListener('pywebviewready', async () => {
         _renderPeakTimesLegend();
 
         initSourceTrimUI();
+        loadTeacherTools();
 
         // Start background upload scheduler
         await pywebview.api.start_scheduler();
@@ -303,6 +306,141 @@ function navigateTo(section) {
     if (section === 'results') loadResults();
     if (section === 'upload') loadUploadSection();
     if (section === 'library') loadLibrary();
+    if (section === 'tools') renderTeacherTools();
+}
+
+/* ── Herramientas sugeridas (panel docente) ───────────────────────────── */
+
+function loadTeacherTools() {
+    const seeded = [{
+        name: 'Herramienta 1',
+        required: 'yes',
+        career: '',
+        shift: '',
+        parallel: '',
+        subject: '',
+        link: '',
+        hasRegister: '',
+        description: '',
+    }];
+    state.teacherTools = loadLocal('teacher_tools', seeded);
+    renderTeacherTools();
+}
+
+function saveTeacherToolsLocal() {
+    saveLocal('teacher_tools', state.teacherTools);
+}
+
+function _toolValue(v) {
+    const t = String(v || '').trim();
+    return t || 'Seleccionar';
+}
+
+function renderTeacherTools() {
+    const grid = document.getElementById('teacher-tools-grid');
+    const empty = document.getElementById('teacher-tools-empty');
+    if (!grid || !empty) return;
+
+    grid.innerHTML = '';
+    if (!state.teacherTools.length) {
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+
+    state.teacherTools.forEach((tool, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card teacher-tool-card';
+        const requiredText = tool.required === 'yes' ? 'Obligatorio' : 'Opcional';
+        card.innerHTML = `
+            <div class="teacher-tool-card-header">
+                <h3>${escHtml(tool.name || `Herramienta ${idx + 1}`)}</h3>
+                <span class="teacher-required-badge ${tool.required === 'yes' ? 'required' : ''}">${requiredText}</span>
+            </div>
+            <div class="teacher-tool-fields">
+                <div><strong>Carrera</strong><span>${escHtml(_toolValue(tool.career))}</span></div>
+                <div><strong>Turno</strong><span>${escHtml(_toolValue(tool.shift))}</span></div>
+                <div><strong>Paralelo</strong><span>${escHtml(_toolValue(tool.parallel))}</span></div>
+                <div><strong>Materia</strong><span>${escHtml(_toolValue(tool.subject))}</span></div>
+                <div class="teacher-tool-field-wide"><strong>Link de la herramienta</strong><span>${tool.link ? `<a href="${escHtml(tool.link)}" target="_blank" rel="noopener noreferrer">${escHtml(tool.link)}</a>` : 'Pega cualquier link aquí'}</span></div>
+                <div><strong>¿Tiene registro?</strong><span>${escHtml(_toolValue(tool.hasRegister))}</span></div>
+                <div class="teacher-tool-field-wide"><strong>Descripción de la herramienta</strong><span>${escHtml(tool.description || 'Describe para qué sirve y cómo la usarías en la materia.')}</span></div>
+            </div>
+            <div class="teacher-tool-actions">
+                <button class="btn-secondary btn-sm" onclick="editTeacherTool(${idx})">Editar</button>
+                <button class="btn-danger btn-sm" onclick="deleteTeacherTool(${idx})">Eliminar</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function openTeacherToolForm() {
+    state.editingToolIndex = -1;
+    document.getElementById('teacher-tool-form-title').textContent = 'Herramienta nueva';
+    document.getElementById('tool-name').value = `Herramienta ${state.teacherTools.length + 1}`;
+    document.getElementById('tool-required').value = 'yes';
+    document.getElementById('tool-career').value = '';
+    document.getElementById('tool-shift').value = '';
+    document.getElementById('tool-group').value = '';
+    document.getElementById('tool-subject').value = '';
+    document.getElementById('tool-link').value = '';
+    document.getElementById('tool-has-register').value = '';
+    document.getElementById('tool-description').value = '';
+    document.getElementById('teacher-tool-form-card')?.classList.remove('hidden');
+}
+
+function closeTeacherToolForm() {
+    state.editingToolIndex = -1;
+    document.getElementById('teacher-tool-form-card')?.classList.add('hidden');
+}
+
+function editTeacherTool(idx) {
+    const tool = state.teacherTools[idx];
+    if (!tool) return;
+    state.editingToolIndex = idx;
+    document.getElementById('teacher-tool-form-title').textContent = `Editar ${tool.name || `Herramienta ${idx + 1}`}`;
+    document.getElementById('tool-name').value = tool.name || '';
+    document.getElementById('tool-required').value = tool.required || 'yes';
+    document.getElementById('tool-career').value = tool.career || '';
+    document.getElementById('tool-shift').value = tool.shift || '';
+    document.getElementById('tool-group').value = tool.parallel || '';
+    document.getElementById('tool-subject').value = tool.subject || '';
+    document.getElementById('tool-link').value = tool.link || '';
+    document.getElementById('tool-has-register').value = tool.hasRegister || '';
+    document.getElementById('tool-description').value = tool.description || '';
+    document.getElementById('teacher-tool-form-card')?.classList.remove('hidden');
+}
+
+function saveTeacherTool() {
+    const payload = {
+        name: (document.getElementById('tool-name')?.value || '').trim() || 'Herramienta',
+        required: document.getElementById('tool-required')?.value || 'yes',
+        career: (document.getElementById('tool-career')?.value || '').trim(),
+        shift: (document.getElementById('tool-shift')?.value || '').trim(),
+        parallel: (document.getElementById('tool-group')?.value || '').trim(),
+        subject: (document.getElementById('tool-subject')?.value || '').trim(),
+        link: (document.getElementById('tool-link')?.value || '').trim(),
+        hasRegister: (document.getElementById('tool-has-register')?.value || '').trim(),
+        description: (document.getElementById('tool-description')?.value || '').trim(),
+    };
+    if (state.editingToolIndex >= 0 && state.teacherTools[state.editingToolIndex]) {
+        state.teacherTools[state.editingToolIndex] = payload;
+    } else {
+        state.teacherTools.push(payload);
+    }
+    saveTeacherToolsLocal();
+    renderTeacherTools();
+    closeTeacherToolForm();
+    toast('Herramienta guardada', 'success');
+}
+
+function deleteTeacherTool(idx) {
+    if (idx < 0 || idx >= state.teacherTools.length) return;
+    state.teacherTools.splice(idx, 1);
+    saveTeacherToolsLocal();
+    renderTeacherTools();
+    toast('Herramienta eliminada', 'success');
 }
 
 /* ── Generate ──────────────────────────────────────────────────────────── */

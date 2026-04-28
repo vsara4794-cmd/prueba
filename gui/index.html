@@ -38,6 +38,13 @@
                     </svg>
                     <span>Todos los vídeos</span>
                 </button>
+                <button class="nav-item" data-section="tools" onclick="navigateTo('tools')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                    <span>Herramientas</span>
+                </button>
                 <button class="nav-item" data-section="upload" onclick="navigateTo('upload')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -83,6 +90,7 @@
                     <div class="hero">
                         <h1>Crea clips virales</h1>
                         <p class="subtitle">Pega una URL de YouTube: detectamos los mejores momentos, añadimos subtítulos con estilo y exportamos clips verticales 9:16 listos para publicar.</p>
+                        <button class="btn-secondary btn-sm hero-tools-btn" onclick="navigateTo('tools')">Herramientas sugeridas</button>
                     </div>
 
                     <div class="url-input-card card card-glow">
@@ -379,6 +387,88 @@
                         </div>
                         <p>No hay vídeos en la biblioteca</p>
                         <span>Los clips generados aparecerán aquí</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── HERRAMIENTAS SUGERIDAS ───────────────────── -->
+            <section id="section-tools" class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Herramientas sugeridas</h2>
+                        <span class="section-subtitle">Panel docente: crea, edita y organiza herramientas por materia.</span>
+                    </div>
+                    <div class="section-header-actions">
+                        <button class="btn-secondary btn-sm" onclick="openTeacherToolForm()">Nueva herramienta</button>
+                    </div>
+                </div>
+
+                <div id="teacher-tools-empty" class="empty-state hidden">
+                    <div class="empty-state-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+                        </svg>
+                    </div>
+                    <h3>Aún no hay herramientas sugeridas</h3>
+                    <span>Empieza creando la primera herramienta para tu clase.</span>
+                </div>
+
+                <div id="teacher-tools-grid" class="teacher-tools-grid"></div>
+
+                <div id="teacher-tool-form-card" class="card teacher-tool-form-card hidden">
+                    <div class="teacher-tool-form-header">
+                        <h3 id="teacher-tool-form-title">Herramienta nueva</h3>
+                        <button class="btn-secondary btn-sm" onclick="closeTeacherToolForm()">Cerrar</button>
+                    </div>
+                    <div class="teacher-tool-form-grid">
+                        <div class="setting-row">
+                            <label for="tool-name">Nombre</label>
+                            <input id="tool-name" class="form-input" type="text" placeholder="Herramienta 1" spellcheck="false">
+                        </div>
+                        <div class="setting-row">
+                            <label for="tool-required">¿Es obligatoria?</label>
+                            <select id="tool-required" class="form-select">
+                                <option value="yes">Obligatorio</option>
+                                <option value="no">Opcional</option>
+                            </select>
+                        </div>
+                        <div class="setting-row">
+                            <label for="tool-career">Carrera</label>
+                            <input id="tool-career" class="form-input" type="text" placeholder="Seleccionar" spellcheck="false">
+                        </div>
+                        <div class="setting-row">
+                            <label for="tool-shift">Turno</label>
+                            <input id="tool-shift" class="form-input" type="text" placeholder="Seleccionar" spellcheck="false">
+                        </div>
+                        <div class="setting-row">
+                            <label for="tool-group">Paralelo</label>
+                            <input id="tool-group" class="form-input" type="text" placeholder="Seleccionar" spellcheck="false">
+                        </div>
+                        <div class="setting-row">
+                            <label for="tool-subject">Materia</label>
+                            <input id="tool-subject" class="form-input" type="text" placeholder="Seleccionar" spellcheck="false">
+                        </div>
+                        <div class="setting-row teacher-tool-wide">
+                            <label for="tool-link">Link de la herramienta</label>
+                            <input id="tool-link" class="form-input" type="text" placeholder="Pega cualquier link aquí" spellcheck="false">
+                        </div>
+                        <div class="setting-row">
+                            <label for="tool-has-register">¿Tiene registro?</label>
+                            <select id="tool-has-register" class="form-select">
+                                <option value="">Seleccionar</option>
+                                <option value="si">Sí</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="setting-row teacher-tool-wide">
+                            <label for="tool-description">Descripción de la herramienta</label>
+                            <textarea id="tool-description" class="form-input" placeholder="Describe para qué sirve y cómo la usarías en la materia." spellcheck="false"></textarea>
+                        </div>
+                    </div>
+                    <div class="teacher-tool-form-actions">
+                        <button class="btn-primary btn-sm" onclick="saveTeacherTool()">Guardar</button>
+                        <button class="btn-secondary btn-sm" onclick="closeTeacherToolForm()">Cancelar</button>
                     </div>
                 </div>
             </section>

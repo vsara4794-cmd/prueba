@@ -577,6 +577,68 @@ code { background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 5px;
 .section-header h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; }
 .section-header-actions { display: flex; gap: 8px; align-items: center; }
 
+.hero-tools-btn { margin-top: 10px; }
+
+.teacher-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.teacher-tool-card { padding: 16px; }
+.teacher-tool-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.teacher-tool-card-header h3 { font-size: 15px; margin: 0; }
+.teacher-required-badge {
+    font-size: 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    padding: 2px 8px;
+    color: var(--text-2);
+}
+.teacher-required-badge.required {
+    color: #ffd166;
+    border-color: rgba(255, 209, 102, 0.35);
+    background: rgba(255, 209, 102, 0.08);
+}
+.teacher-tool-fields { display: grid; gap: 8px; }
+.teacher-tool-fields div { display: grid; gap: 3px; }
+.teacher-tool-fields strong {
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.teacher-tool-fields span { font-size: 13px; color: var(--text-1); word-break: break-word; }
+.teacher-tool-fields a { color: var(--accent-light); text-decoration: none; }
+.teacher-tool-fields a:hover { text-decoration: underline; }
+.teacher-tool-actions { margin-top: 12px; display: flex; gap: 8px; }
+
+.teacher-tool-form-card { margin-top: 8px; }
+.teacher-tool-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.teacher-tool-form-header h3 { margin: 0; font-size: 16px; }
+.teacher-tool-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+}
+.teacher-tool-wide { grid-column: 1 / -1; }
+.teacher-tool-form-actions { margin-top: 12px; display: flex; gap: 8px; }
+
+@media (max-width: 768px) {
+    .teacher-tool-form-grid { grid-template-columns: 1fr; }
+}
+
 .results-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
