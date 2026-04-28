@@ -111,6 +111,23 @@ function _applyThumb(el, dataUrl) {
     if (placeholder) placeholder.style.opacity = '0';
 }
 
+function normalizeMediaUrl(rawUrl, kind = 'clip') {
+    if (!rawUrl) return '';
+    try {
+        const u = new URL(rawUrl, window.location.origin);
+        const isLoopback = u.hostname === '127.0.0.1' || u.hostname === 'localhost';
+        if (!isLoopback) return u.toString();
+
+        const parts = u.pathname.split('/').filter(Boolean);
+        const file = parts.length ? parts[parts.length - 1] : '';
+        if (!file) return rawUrl;
+        const base = kind === 'music' ? '/media/music/' : '/media/clips/';
+        return base + encodeURIComponent(file);
+    } catch (_) {
+        return rawUrl;
+    }
+}
+
 /* ── Lazy loading via IntersectionObserver ────────────────────────────── */
 
 const _lazyObserver = new IntersectionObserver((entries) => {
@@ -503,9 +520,9 @@ async function loadWaveform(filename) {
         try {
             const urlResult = await pywebview.api.get_music_url(filename);
             if (urlResult.url) {
-                trimmerState.audioUrl = urlResult.url;
+                trimmerState.audioUrl = normalizeMediaUrl(urlResult.url, 'music');
                 const audio = document.getElementById('trimmer-audio');
-                if (audio) audio.src = urlResult.url;
+                if (audio) audio.src = trimmerState.audioUrl;
             }
         } catch (_) {}
 
@@ -1412,6 +1429,8 @@ window.onPipelineComplete = function (success, doneCount, totalCount, errorMsg) 
             state.results = r.clips || [];
             state.moments = r.moments || state.moments;
         }).catch(() => {});
+        // Keep "Todos los vídeos" in sync after each generation
+        loadLibrary().catch(() => {});
     } else {
         toast(errorMsg || 'Error en el procesamiento', 'error');
         addNotification('Error en el procesamiento', errorMsg || 'Ocurrió un error al generar los clips', 'error');
@@ -1693,7 +1712,7 @@ async function loadResults() {
         const r = urls[i];
         if (r && r.url) {
             const thumbEl = document.querySelector(`.result-card-thumb[data-clip-idx="${i}"]`);
-            if (thumbEl) lazyThumb(thumbEl, r.url);
+            if (thumbEl) lazyThumb(thumbEl, normalizeMediaUrl(r.url, 'clip'));
         }
     });
 }
@@ -1707,7 +1726,7 @@ async function previewClip(idx) {
         if (r.url) {
             state.previewClipIdx = idx;
             const video = document.getElementById('preview-video');
-            video.src = r.url;
+            video.src = normalizeMediaUrl(r.url, 'clip');
             document.getElementById('preview-modal-title').textContent = `Clip ${idx + 1}`;
             showModal('preview-modal');
             video.play().catch(() => {});
@@ -1835,8 +1854,9 @@ function _buildLibraryCard(clip) {
     item.className = 'library-item';
     const d = new Date(clip.modified * 1000);
     const dateStr = d.toLocaleDateString('es', { month: 'short', day: 'numeric', year: 'numeric' });
+    const playableUrl = normalizeMediaUrl(clip.url, 'clip');
     item.innerHTML = `
-        <div class="library-item-thumb" data-lib-url="${escHtml(clip.url)}" onclick="previewLibraryClip('${escHtml(clip.filename)}', '${escHtml(clip.url)}')">
+        <div class="library-item-thumb" data-lib-url="${escHtml(playableUrl)}" onclick="previewLibraryClip('${escHtml(clip.filename)}', '${escHtml(playableUrl)}')">
             <div class="thumb-placeholder">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </div>
@@ -1858,7 +1878,7 @@ function _buildLibraryCard(clip) {
         </div>`;
     // Lazy-load thumbnail
     const thumbEl = item.querySelector('.library-item-thumb');
-    if (clip.url && thumbEl) lazyThumb(thumbEl, clip.url);
+    if (playableUrl && thumbEl) lazyThumb(thumbEl, playableUrl);
     return item;
 }
 
@@ -1926,7 +1946,7 @@ function setLibraryView(view) {
 function previewLibraryClip(filename, url) {
     state.previewClipIdx = -1; // not from results
     const video = document.getElementById('preview-video');
-    video.src = url;
+    video.src = normalizeMediaUrl(url, 'clip');
     document.getElementById('preview-modal-title').textContent = filename;
     // Hide delete button in preview for library (use library's own delete)
     document.getElementById('preview-delete-btn').style.display = 'none';
