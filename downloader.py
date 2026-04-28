@@ -1,11 +1,11 @@
 import re
 import uuid
-import os
 
 import yt_dlp
 from pathlib import Path
 
 from config import BASE_DIR, DOWNLOADS_DIR
+from cookie_support import get_cookie_candidates
 from subprocess_utils import run as _run
 
 # Prefer H.264 (avc1) which every ffmpeg supports.
@@ -30,17 +30,6 @@ _COOKIE_BROWSERS = ("edge", "chrome", "firefox")
 def _is_bot_block_error(err: Exception) -> bool:
     msg = str(err).lower()
     return any(h in msg for h in _YT_BOT_HINTS)
-
-
-def _cookie_candidates() -> list[Path]:
-    """Possible cookie files in priority order."""
-    env_cookie = os.getenv("YTDLP_COOKIEFILE")
-    candidates: list[Path] = []
-    if env_cookie:
-        candidates.append(Path(env_cookie))
-    candidates.append(BASE_DIR / "cookies.txt")
-    candidates.append(BASE_DIR / "tokens" / "cookies.txt")
-    return [p for p in candidates if p.exists()]
 
 
 def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
@@ -77,7 +66,7 @@ def download_video(url: str, output_dir: Path = DOWNLOADS_DIR) -> Path:
         if not _is_bot_block_error(e):
             raise
         # 1) Try explicit cookie files (works in cloud/local).
-        for cookies_path in _cookie_candidates():
+        for cookies_path in get_cookie_candidates(BASE_DIR):
             try:
                 print(f"[i] Intentando con cookies.txt: {cookies_path}")
                 return _run({"cookiefile": str(cookies_path)})

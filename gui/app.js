@@ -1081,8 +1081,39 @@ function addUrlsFromInput() {
     textarea.style.height = 'auto'; // reset height after clearing
 }
 
+function isSupportedSourceInput(value) {
+    if (!value) return false;
+    const raw = String(value).trim();
+    if (!raw) return false;
+
+    // Local file path (Windows / unix-ish) should pass.
+    if (/^[a-zA-Z]:\\/.test(raw) || raw.startsWith('\\\\') || raw.startsWith('/') || raw.startsWith('./') || raw.startsWith('../')) {
+        return true;
+    }
+
+    // Accept only YouTube URLs for remote sources.
+    try {
+        const u = new URL(raw);
+        const host = (u.hostname || '').toLowerCase();
+        return (
+            host === 'youtube.com' ||
+            host === 'www.youtube.com' ||
+            host === 'm.youtube.com' ||
+            host === 'youtu.be' ||
+            host.endsWith('.youtube.com')
+        );
+    } catch (_) {
+        // Not a valid URL and not a local path.
+        return false;
+    }
+}
+
 function addToBatchQueue(url) {
     if (!url) return;
+    if (!isSupportedSourceInput(url)) {
+        toast('Solo se aceptan enlaces de YouTube o archivos locales.', 'warning');
+        return;
+    }
     // Avoid duplicates
     if (state.batchQueue.some(q => q.url === url)) return;
     const tramo = getTramoSnapshot();
@@ -1159,6 +1190,13 @@ async function processNextInQueue() {
     }
 
     const item = state.batchQueue[state.batchIndex];
+    if (!isSupportedSourceInput(item.url)) {
+        item.status = 'error';
+        renderBatchQueue();
+        toast(`Fuente no compatible: ${item.label}`, 'error');
+        processNextInQueue();
+        return;
+    }
     item.status = 'active';
     renderBatchQueue();
 

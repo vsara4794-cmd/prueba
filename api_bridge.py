@@ -36,6 +36,7 @@ from config import (
     WHISPER_LANGUAGE,
     WHISPER_MODEL,
 )
+from cookie_support import get_cookie_candidates
 from detector import find_viral_moments
 from transcriber import transcribe_clip, find_sentence_boundary
 from subtitler import generate_subtitles, get_available_styles
@@ -175,17 +176,6 @@ def _start_video_server(clips_dir: Path) -> int:
 def _target_ratio_from_format(output_format: str | None) -> float | None:
     """Map the UI output format to a crop ratio."""
     return OUTPUT_FORMAT_RATIOS.get(output_format or OUTPUT_FORMAT, 9 / 16)
-
-
-def _cookie_candidates() -> list[Path]:
-    """Possible cookie files in priority order."""
-    env_cookie = os.getenv("YTDLP_COOKIEFILE")
-    candidates: list[Path] = []
-    if env_cookie:
-        candidates.append(Path(env_cookie))
-    candidates.append(BASE_DIR / "cookies.txt")
-    candidates.append(BASE_DIR / "tokens" / "cookies.txt")
-    return [p for p in candidates if p.exists()]
 
 
 def _build_center_crop_params(video_path: Path, target_ratio: float) -> tuple[int, int, int, int] | None:
@@ -1375,7 +1365,7 @@ class ApiBridge:
             if not bot_block:
                 raise
 
-            for cookies_path in _cookie_candidates():
+            for cookies_path in get_cookie_candidates(BASE_DIR):
                 self._push("download", 0, "YouTube pidió verificación; probando cookies.txt…")
                 try:
                     print(f"[i] Reintento con cookies.txt: {cookies_path}")

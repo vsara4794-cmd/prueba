@@ -183,6 +183,30 @@ Important:
 - Docker deploys use `requirements.deploy.txt` (lighter runtime dependencies) to keep image size within free-tier limits.
 - Optional heavy features depending on local desktop stack (e.g. YOLO package-based setup) may degrade gracefully in cloud mode.
 
+#### YouTube anti-bot on cloud deploys
+
+Some YouTube links require authenticated cookies in server environments.
+
+Supported cookie inputs (priority order):
+
+1. `YTDLP_COOKIEFILE` (absolute path inside container)
+2. `YTDLP_COOKIES_B64` (base64 of Netscape cookies content)
+3. `YTDLP_COOKIES_TXT` (raw Netscape cookies content)
+4. Local fallback files: `cookies.txt` or `tokens/cookies.txt`
+
+For Railway/Render, recommended approach:
+
+1. Export `cookies.txt` from a logged-in YouTube session.
+2. Convert to base64.
+3. Set `YTDLP_COOKIES_B64` as a secret environment variable.
+4. Redeploy.
+
+PowerShell helper:
+
+```powershell
+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes((Get-Content .\cookies.txt -Raw)))
+```
+
 ---
 
 ## Usage
