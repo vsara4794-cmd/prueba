@@ -26,6 +26,7 @@ from pydantic import BaseModel, Field
 import uvicorn
 
 from api_bridge import ApiBridge
+from config import CLIPS_DIR, MUSIC_DIR
 
 GUI_DIR = Path(__file__).resolve().parent / "gui"
 
@@ -83,6 +84,18 @@ def rpc_call(body: RpcBody) -> JSONResponse:
         result = json.loads(json.dumps(result, default=str))
     return JSONResponse({"result": result})
 
+
+app.mount(
+    "/media/clips",
+    StaticFiles(directory=str(CLIPS_DIR)),
+    name="clips",
+)
+
+app.mount(
+    "/media/music",
+    StaticFiles(directory=str(MUSIC_DIR)),
+    name="music",
+)
 
 app.mount(
     "/",

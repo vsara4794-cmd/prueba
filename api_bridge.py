@@ -16,6 +16,8 @@ import threading
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import quote
+from uuid import uuid4
 
 import yt_dlp
 
@@ -229,6 +231,20 @@ class ApiBridge:
 
         # Load persisted state from previous session
         self._load_state()
+
+    def _is_web_mode(self) -> bool:
+        """True when running via FastAPI web mode (no pywebview window)."""
+        return self._window is None
+
+    def _clip_url(self, filename: str) -> str:
+        if self._is_web_mode():
+            return f"/media/clips/{quote(filename)}"
+        return f"http://127.0.0.1:{self._video_port}/{filename}"
+
+    def _music_url(self, filename: str) -> str:
+        if self._is_web_mode():
+            return f"/media/music/{quote(filename)}"
+        return f"http://127.0.0.1:{self._music_port}/{filename}"
 
     # ── Exposed: config / deps ───────────────────────────────────────────
 
@@ -592,7 +608,7 @@ class ApiBridge:
         """Return a local HTTP URL for a music file so the browser can play it."""
         music_path = MUSIC_DIR / filename
         if music_path.exists():
-            return {"url": f"http://127.0.0.1:{self._music_port}/{filename}"}
+            return {"url": self._music_url(filename)}
         return {"url": None}
 
     def open_music_folder(self):
@@ -695,7 +711,7 @@ class ApiBridge:
                 "path": str(p),
                 "filename": p.name,
                 "size_mb": round(p.stat().st_size / (1024 * 1024), 1) if p.exists() else 0,
-                "url": f"http://127.0.0.1:{self._video_port}/{p.name}" if p.exists() else "",
+                "url": self._clip_url(p.name) if p.exists() else "",
             }
             # Include source_stem for grouping renamed clips
             if i < len(self._moments) and self._moments[i].get("source_stem"):
@@ -747,7 +763,7 @@ class ApiBridge:
         if 0 <= clip_index < len(self._results):
             p = self._results[clip_index]
             if p.exists():
-                return {"url": f"http://127.0.0.1:{self._video_port}/{p.name}"}
+                return {"url": self._clip_url(p.name)}
         return {"url": None}
 
     # ── Exposed: delete clip ────────────────────────────────────────────
@@ -804,7 +820,7 @@ class ApiBridge:
                     "filename": p.name,
                     "size_mb": round(st.st_size / (1024 * 1024), 1),
                     "modified": st.st_mtime,
-                    "url": f"http://127.0.0.1:{self._video_port}/{p.name}",
+                    "url": self._clip_url(p.name),
                 })
         return {
             "clips": clips,
@@ -929,6 +945,7 @@ class ApiBridge:
         stem: str,
         vid_duration: float,
         settings: dict,
+        run_tag: str | None = None,
     ) -> list[Path]:
         """Transcribe, subtitular y renderizar cada momento sobre ``video_path``."""
         self._moments.extend(moments)
@@ -1042,7 +1059,8 @@ class ApiBridge:
                 self._cancelled()
                 raise CancelledError("cancelled")
             self._clip_push(clip_num, total, "render", 0, f"Clip {clip_num}/{total}: renderizando…")
-            out = CLIPS_DIR / f"{stem}_viral{clip_num}.mp4"
+            safe_tag = run_tag or datetime.now().strftime("%Y%m%d%H%M%S")
+            out = CLIPS_DIR / f"{stem}_{safe_tag}_viral{clip_num}.mp4"
             clip_result = extract_clip(
                 video_path, start, end, out,
                 subtitle_path=ass if words else None,
@@ -1089,6 +1107,7 @@ class ApiBridge:
 
     def _run_pipeline(self, url, settings):
         try:
+            run_tag = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + uuid4().hex[:6]
             num_clips_raw = settings.get("num_clips", NUM_CLIPS)
             auto_clips = num_clips_raw == "auto"
             num_clips = NUM_CLIPS if auto_clips else int(num_clips_raw)
@@ -1159,7 +1178,7 @@ class ApiBridge:
                     seg_settings = {**settings, "manual_tramo_strict": True}
                     try:
                         sub_done = self._run_clips_loop(
-                            seg_path, [moment], stem_seg, seg_dur, seg_settings,
+                            seg_path, [moment], stem_seg, seg_dur, seg_settings, run_tag=run_tag,
                         )
                     except CancelledError:
                         return self._cancelled()
@@ -1281,7 +1300,7 @@ class ApiBridge:
             stem = video_path.stem[:50]
             total = len(moments)
             try:
-                done = self._run_clips_loop(video_path, moments, stem, vid_duration, settings)
+                done = self._run_clips_loop(video_path, moments, stem, vid_duration, settings, run_tag=run_tag)
             except CancelledError:
                 return self._cancelled()
 
